@@ -19,7 +19,7 @@ StashIt is a lightweight file-sharing tool where you can **stash files** on the 
 
 - **Frontend:** React ⚛️ / Vite ⚡
 - **Backend:** Node.js + Express 🚀
-- **Database (planned):** MongoDB 🗄️
+- **Database:** Supabase 🗄️
 - **Styling:** TailwindCSS 🎨
 
 ---
@@ -29,6 +29,6 @@ StashIt is a lightweight file-sharing tool where you can **stash files** on the 
 ### Clone the repo
 
 ```bash
-git clone https://github.com/your-username/stashit.git
+git clone https://github.com/u-cant-see-me/StashIt.git
 cd stashit
 ```
