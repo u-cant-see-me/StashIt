@@ -1,0 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-monoton: "Roboto Mono", monospace;
+  --font-code: "Fira Code", monospace;
+  --animate-sonar: sonar 2s ease-in-out infinite;
+  @keyframes sonar {
+    from {
+      opacity: 0.4;
+    }
+    to {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+  --animate-blink: blink 0.5s ease-in-out infinite;
+  @keyframes blink {
+    from {
+      opacity: 0.5;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+}
+
+.sonar-delay-1 {
+  animation-delay: 1s;
+}
+.sonar-delay-2 {
+  animation-delay: 1.5s;
+}
+.sonar-delay-3 {
+  animation-delay: 2s;
+}
+::-webkit-scrollbar {
+  width: 0px;
+}
+
+button {
+  cursor: pointer;
+  outline: none;
+}
