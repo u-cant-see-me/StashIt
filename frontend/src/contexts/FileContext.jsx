@@ -5,6 +5,7 @@ const FileContext = createContext();
 
 export const FileProvider = ({ children }) => {
   const [files, setFile] = usePersistentState("uploads", []);
+  const [expiry, setExpiry] = usePersistentState("expiry", "once");
 
   const addFile = (file) => {
     setFile((prev) => [...prev, file]);
@@ -36,7 +37,15 @@ export const FileProvider = ({ children }) => {
 
   return (
     <FileContext.Provider
-      value={{ files, addFile, removeFile, updateState, clearFiles }}
+      value={{
+        files,
+        addFile,
+        removeFile,
+        updateState,
+        clearFiles,
+        setExpiry,
+        expiry,
+      }}
     >
       {children}
     </FileContext.Provider>

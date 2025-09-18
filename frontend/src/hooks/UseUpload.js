@@ -5,10 +5,10 @@ import { generateMetaData } from "../utils/utils";
 import { useKey } from "../contexts/KeyContext";
 
 export const useUpload = () => {
-  const { files, updateState } = useFile();
+  const { files, updateState, expiry } = useFile();
   const { addKey } = useKey();
   const [requestState, setRequestState] = useState({
-    status: null,
+    status: "idle", //idle / connecting /connected
     error: null,
   });
   const [uploadState, setUploadState] = useState({
@@ -29,7 +29,7 @@ export const useUpload = () => {
 
   const sendRequest = async () => {
     try {
-      setRequestState({ status: "pending", error: "null" });
+      setRequestState({ status: "connecting", error: "null" });
 
       const metadata = generateMetaData(files);
 
@@ -37,6 +37,7 @@ export const useUpload = () => {
 
       const res = await axios.post(url, {
         files: metadata,
+        expiry,
       });
 
       const { signedUrls, stashKey } = await res.data;
@@ -45,7 +46,7 @@ export const useUpload = () => {
       setUploadUrls(signedUrls);
       addKey(stashKey);
 
-      setRequestState({ status: "success", error: null });
+      setRequestState({ status: "connected", error: null });
       return signedUrls;
     } catch (error) {
       setRequestState({ status: "error", error: error.message });
@@ -107,7 +108,7 @@ export const useUpload = () => {
       for (const url of urls) {
         const file = files.find((file) => file.fileInfo.id === url.id);
         currFile.current = file;
-
+        console.log("Test", file, "url", url);
         setUploadState((prev) => ({ ...prev, currFile: file }));
         updateState({ status: "uploading" }, file.fileInfo.id);
 
@@ -115,8 +116,7 @@ export const useUpload = () => {
           url.uploadUrl,
           file.fileObj,
           file.fileInfo.type,
-          file.fileInfo.id,
-          1
+          file.fileInfo.id
         );
 
         updateState({ status: "success" }, file.fileInfo.id);
@@ -137,6 +137,7 @@ export const useUpload = () => {
       );
     } finally {
       setUploadState((prev) => ({ ...prev, uploading: false }));
+      setRequestState({ status: "idle", error: null });
     }
   };
 

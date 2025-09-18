@@ -6,7 +6,7 @@ import Modal from "./Modal";
 import ProgressBar from "./ui/ProgressBar";
 import { File } from "lucide-react";
 import { RenderPreview } from "./RenderPreview";
-
+import { FileIcon } from "./ui/FileIcon";
 const DownloadList = ({ files }) => {
   const [currFileDownloading, setCurrFileDownloading] = useState(null);
   const [progress, setProgress] = useState({});
@@ -21,7 +21,6 @@ const DownloadList = ({ files }) => {
     console.log(preview);
   };
   const handleDownload = async (id) => {
-    setPreview(false);
     const file = files.find((f) => f.id === id);
     console.log(file.downloadUrl.signedUrl);
     if (!file) return;
@@ -92,17 +91,17 @@ const DownloadList = ({ files }) => {
         {files.map((file) => (
           <li
             key={file.id}
-            className="relative w-[70%] flex items-center justify-between text-sm font-mono border-b p-4
+            className="relative w-full md:w-[70%] flex items-center justify-between text-sm font-mono border-b p-4
                  border-neutral-900
  "
             onClick={() => handlePreview(file)}
           >
-            <div>
+            <div className="min-w-0">
               <p className="truncate text-neutral-300">{file.name}</p>
               <p className="flex gap-2 text-neutral-500">
                 <span>{file.formattedSize.size}</span>
                 <span className="flex items-center justify-center">
-                  <File size={12} color="green" />
+                  <FileIcon type={file.type} />
                 </span>
               </p>
             </div>

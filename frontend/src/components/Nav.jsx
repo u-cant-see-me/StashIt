@@ -34,7 +34,7 @@ const Nav = ({ currSection, setCurrSection }) => {
       </div>
 
       {/* Right side empty spacer */}
-      <div className="flex-1"></div>
+      <div className="hidden md:flex flex-1"></div>
     </div>
   );
 };

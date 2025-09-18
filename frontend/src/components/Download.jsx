@@ -18,14 +18,14 @@ const Download = () => {
   }, [debouncedKey, sendRequest]);
 
   return (
-    <div className="p-10 w-full">
+    <div className="md:p-10 w-full">
       <div className="flex flex-col items-center justify-center w-full ">
-        <div className=" flex  items-center justify-center p-4 w-[50%]">
+        <div className=" flex  items-center justify-center pt-4  md:p-4 w-[70%] md:w-[50%]">
           <input
             type="text"
             placeholder="enter-stash-key"
             onChange={handleInputKey}
-            value={"downloadKey"}
+            value={stashKey}
             className="
               w-full m-2 
               max-w-md

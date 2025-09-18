@@ -5,7 +5,7 @@ const KeyContext = createContext();
 
 export const KeyProvider = ({ children }) => {
   const [key, setKey] = usePersistentState(null);
-  const [downloadKey, setDownloadKey] = useState(null);
+  const [downloadKey, setDownloadKey] = useState("");
   const addKey = (key) => {
     setKey(key);
   };

@@ -6,7 +6,7 @@ export const RenderPreview = ({ preview }) => {
       <img
         src={downloadUrl.signedUrl}
         alt="preview"
-        className="max-w-full max-h-[80vh] object-contain rounded"
+        className="max-w-full  max-h-[80vh] object-contain rounded"
       />
     );
   }
@@ -15,7 +15,7 @@ export const RenderPreview = ({ preview }) => {
     return (
       <video
         src={downloadUrl.signedUrl}
-        className="max-w-full max-h-[80vh] object-contain rounded"
+        className="max-w-full  max-h-[80vh] object-contain rounded"
         controls
         autoPlay
         loop
@@ -28,7 +28,7 @@ export const RenderPreview = ({ preview }) => {
     return (
       <audio
         src={downloadUrl.signedUrl}
-        className="w-full"
+        className="max-w-full"
         controls
         autoPlay
         loop

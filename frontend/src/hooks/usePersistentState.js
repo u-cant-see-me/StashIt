@@ -7,7 +7,7 @@ const usePersistentState = (key, defaultValue) => {
   });
 
   useEffect(() => {
-    sessionStorage.setItem(key, JSON.stringify(state));
+    if (key && state) sessionStorage.setItem(key, JSON.stringify(state));
   }, [key, state]);
 
   return [state, setState];

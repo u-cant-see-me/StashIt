@@ -10,5 +10,5 @@ const router = express.Router();
 
 router.post("/upload", uploadController);
 router.get("/download", protect, downloadFileUrlController);
-router.get("/retry", retryUploadUrl);
+router.post("/retry", retryUploadUrl);
 export default router;

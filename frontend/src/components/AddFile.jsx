@@ -4,6 +4,8 @@ import { nanoid } from "nanoid";
 import { useState, useRef, useEffect } from "react";
 import Modal from "./Modal";
 import toast from "react-hot-toast";
+import UploadMenu from "./ui/UploadMenu";
+import TextInputModal from "./ui/TextInputModal";
 
 const AddFile = () => {
   const { addFile } = useFile();
@@ -44,9 +46,9 @@ const AddFile = () => {
         },
         fileObj: file,
         state: {
-          status: "pending", //"pending" | "uploading" | "success" | "error"
+          status: "pending",
           progress: 0,
-          error: null, // last recorded error
+          error: null,
           aborted: false,
           uploadUrl: null,
         },
@@ -55,6 +57,7 @@ const AddFile = () => {
       addFile(updatedFile);
     }
   };
+
   const handleSave = () => {
     const content = contentRef.current.value;
     if (content) {
@@ -70,9 +73,9 @@ const AddFile = () => {
         },
         fileObj: file,
         state: {
-          status: "pending", //"pending" | "uploading" | "success" | "error"
+          status: "pending",
           progress: 0,
-          error: null, // last recorded error
+          error: null,
           aborted: false,
           uploadUrl: null,
         },
@@ -83,97 +86,52 @@ const AddFile = () => {
       toast.error("Text content can not be empty");
     }
   };
+
   const sonarWave =
     "animate-sonar absolute w-full h-full rounded-full opacity-0 bg-white";
 
   return (
-    <div className="absolute top-0 left-0">
+    <div className="md:absolute md:top-0 md:left-0 relative">
+      {/* Desktop trigger */}
       <div
-        className="relative h-20 w-20 "
+        className="hidden md:block relative h-20 w-20"
         onClick={() => setShowMenu((prev) => !prev)}
       >
-        {/* Waves outside */}
         <div className={`${sonarWave} sonar-delay-1 z-0`}></div>
         <div className={`${sonarWave} sonar-delay-2 z-0`}></div>
         <div className={`${sonarWave} sonar-delay-3 z-0`}></div>
 
-        {/* Circle button */}
-        <div className="absolute inset-0 flex items-center justify-center bg-white text-black rounded-full z-10 ">
+        <div className="absolute cursor-pointer inset-0 flex items-center justify-center bg-white text-black rounded-full z-10">
           <span className="text-3xl">+</span>
-          {showMenu && (
-            <div
-              ref={menuRef}
-              className="absolute top-0 right-0 transform translate-x-24 translate-y-4"
-            >
-              <ul className="w-40 bg-neutral-900 text-white rounded-xl shadow-lg overflow-hidden animate-fadeIn">
-                <li
-                  className="px-4 py-3 flex items-center gap-2 hover:bg-neutral-700 cursor-pointer transition"
-                  onClick={() => {
-                    fileInputRef.current.click();
-                  }}
-                >
-                  📁 <span>Files</span>
-                  <input
-                    type="file"
-                    multiple
-                    className="hidden"
-                    ref={fileInputRef}
-                    onChange={handleChange}
-                  />
-                </li>
-                <li
-                  className="px-4 py-3 flex items-center gap-2 hover:bg-neutral-700 cursor-pointer transition"
-                  onClick={() => setShowModal(true)}
-                >
-                  📝 <span>Text</span>
-                </li>
-                <li className="px-4 py-3 flex items-center gap-2 hover:bg-neutral-700 cursor-pointer transition">
-                  💻 <span>Code</span>
-                </li>
-              </ul>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Mobile trigger */}
+      <button
+        type="button"
+        className="md:hidden bg-white text-black outline-none w-10 h-10 rounded-lg"
+        onClick={() => setShowMenu((prev) => !prev)}
+      >
+        <span className="text-xl">+</span>
+      </button>
+
+      {showMenu && (
+        <UploadMenu
+          menuRef={menuRef}
+          fileInputRef={fileInputRef}
+          handleChange={handleChange}
+          setShowModal={setShowModal}
+        />
+      )}
+
       {showModal && (
         <Modal onClose={() => setShowModal(false)} preview={false}>
-          <div className="w-[28rem] bg-white rounded-2xl shadow-2xl p-6 flex flex-col gap-4 animate-fadeIn">
-            <h2 className="text-xl font-semibold text-gray-800">
-              <input
-                type="text"
-                name="text"
-                placeholder="Title"
-                ref={titleRef}
-                className="border-b border-gray-300 w-full outline-none"
-              />
-            </h2>
-
-            <textarea
-              name="text"
-              rows="6"
-              placeholder="Write something here..."
-              ref={contentRef}
-              autoFocus
-              className="w-full resize-none p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-800"
-            />
-
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 transition"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition"
-              >
-                Save
-              </button>
-            </div>
-          </div>
+          <TextInputModal
+            titleRef={titleRef}
+            contentRef={contentRef}
+            setShowModal={setShowModal}
+            handleSave={handleSave}
+          />
         </Modal>
       )}
     </div>

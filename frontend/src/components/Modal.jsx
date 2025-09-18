@@ -4,7 +4,7 @@ const modalRoot = document.getElementById("modal-root");
 const Modal = ({ children, onClose, preview }) => {
   if (!modalRoot) return null;
   return createPortal(
-    <div className=" fixed inset-0 flex items-center justify-center bg-black/50">
+    <div className=" fixed z-100 inset-0 flex items-center justify-center bg-black/50 p-4">
       {preview ? (
         <div className="bg-white text-black rounded-lg p-6 relative">
           {children}

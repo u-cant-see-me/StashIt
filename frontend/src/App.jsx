@@ -15,10 +15,10 @@ function App() {
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* <NetworkProvider> */}
-      <div className="h-screen w-screen px-20 pt-5  ">
+      <div className="h-screen w-screen px-4 sm:px-10 md:px-20 pt-5  ">
         <Nav setCurrSection={setCurrSection} currSection={currSection} />
         <KeyProvider>
-          <div className="h-[90%] bg-neutral-950 font-mono p-10 rounded-tl-2xl rounded-tr-2xl text-neutral-200">
+          <div className="h-[90%] bg-neutral-950 font-mono p-4 md:p-10 rounded-tl-2xl rounded-tr-2xl text-neutral-200">
             {currSection === "upload" ? <Main /> : <Download />}
           </div>
         </KeyProvider>
