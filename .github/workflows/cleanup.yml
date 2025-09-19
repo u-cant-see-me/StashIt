@@ -14,9 +14,12 @@ jobs:
           SERVICE_ROLE_KEY: ${{ secrets.SERVICE_ROLE_KEY }}
         run: |
           echo "Calling Supabase cleanup function..."
-          RESPONSE=$(curl -w "%{http_code}" -s -o response.txt -X POST \
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
-            -H "Content-Type: application/json" \
             https://auwjiuhlsjaulczynkwu.supabase.co/functions/v1/cleanup)
-          echo "HTTP status code: $RESPONSE"
-          cat response.txt
+
+          BODY=$(echo "$RESPONSE" | head -n1)
+          STATUS=$(echo "$RESPONSE" | tail -n1)
+
+          echo "HTTP status code: $STATUS"
+          echo "Response body: $BODY"
