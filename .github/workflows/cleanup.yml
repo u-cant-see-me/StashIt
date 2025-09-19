@@ -2,7 +2,7 @@ name: Supabase Cleanup
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/5 * * * *" # runs every 5 minutes
   workflow_dispatch:
 
 jobs:
@@ -14,12 +14,10 @@ jobs:
           SERVICE_ROLE_KEY: ${{ secrets.SERVICE_ROLE_KEY }}
         run: |
           echo "Calling Supabase cleanup function..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+          RESPONSE=$(curl -s -w "%{http_code}" -o response.txt -X POST \
             -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+            -H "x-service-key: $SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
             https://auwjiuhlsjaulczynkwu.supabase.co/functions/v1/cleanup)
-
-          BODY=$(echo "$RESPONSE" | head -n1)
-          STATUS=$(echo "$RESPONSE" | tail -n1)
-
-          echo "HTTP status code: $STATUS"
-          echo "Response body: $BODY"
+          echo "HTTP status code: $RESPONSE"
+          cat response.txt
