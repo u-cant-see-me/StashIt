@@ -108,11 +108,10 @@ export const useUpload = () => {
       for (const url of urls) {
         const file = files.find((file) => file.fileInfo.id === url.id);
         currFile.current = file;
-        console.log("Test", file, "url", url);
         setUploadState((prev) => ({ ...prev, currFile: file }));
         updateState({ status: "uploading" }, file.fileInfo.id);
 
-        const result = await uploadWithRetry(
+        await uploadWithRetry(
           url.uploadUrl,
           file.fileObj,
           file.fileInfo.type,

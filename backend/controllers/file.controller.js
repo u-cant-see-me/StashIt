@@ -146,40 +146,40 @@ export const downloadFileUrlController = asyncHandler(async (req, res) => {
   const files = stashData.files;
   const expiry = stashData.expiry;
 
+  if (expiry === "once") {
+    const { data, error } = await supabase
+      .from("stash")
+      .update({ used: true })
+      .eq("id", tableId)
+      .eq("used", false) //  only update if still unused
+      .select(); // return updated rows
+
+    if (error) {
+      console.error("Error updating key:", error.message);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    if (!data || data.length === 0) {
+      // no row updated → it was already used
+      return res.status(400).json({ message: "Key already used" });
+    }
+
+    console.log("Key successfully marked as used:", tableId);
+  }
+
   const downloadUrls = await Promise.all(
     files.map(async (file) => {
       if (!file.file_path) throw new Error("missing file path");
-      const { data, error } = await supabase.storage
+
+      const { data: signed, error: signedErr } = await supabase.storage
         .from("stash")
         .createSignedUrl(file.file_path, 60 * 60);
-      if (error) throw new Error(error.message);
-      return { ...file, downloadUrl: data };
+
+      if (signedErr) throw new Error(signedErr.message);
+
+      return { ...file, downloadUrl: signed.signedUrl };
     })
   );
 
-  const filePaths = files.map((f) => f.file_path);
-
-  if (expiry === "once") {
-    // delete stash data
-    const { data: deleteData, error: deleteError } = await supabase.storage
-      .from("stash")
-      .remove(filePaths);
-    if (deleteError) {
-      console.error("Storage delete error", deleteError.message);
-    } else {
-      console.log("success delelted data ", deleteData);
-      //delete stash table
-      const { error: tableError } = await supabase
-        .from("stash")
-        .delete()
-        .eq("id", tableId);
-      if (tableError) {
-        console.error("table delete error", tableError.message);
-      } else {
-        console.log("success delelted table ");
-      }
-    }
-  }
-
-  res.json({ downloadUrls, createdAt: req.data.created_at });
+  return res.json({ downloadUrls, createdAt: stashData.created_at });
 });

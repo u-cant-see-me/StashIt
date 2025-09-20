@@ -1,13 +1,13 @@
 import { useCallback, useState } from "react";
 import axios from "axios";
 import { isValidStashKey } from "../utils/utils";
-import { useKey } from "../contexts/KeyContext";
+import { useFile } from "../contexts/FileContext";
 
 export const useDownload = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { addDownloadKey } = useKey();
+  const { setDownloadUrls } = useFile();
 
   const sendRequest = useCallback(async (stashKey) => {
     if (isValidStashKey(stashKey)) {
@@ -20,8 +20,8 @@ export const useDownload = () => {
         const res = await axios.get(url, { params: { stashKey } });
         const { downloadUrls } = await res.data;
         setData(downloadUrls);
+        setDownloadUrls(downloadUrls);
         setIsLoading(false);
-        addDownloadKey(stashKey);
       } catch (error) {
         if (axios.isAxiosError(error)) {
           if (error.response) {

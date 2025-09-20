@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import DownloadList from "./DownloadList";
 import { useDownload } from "../hooks/UseDownload";
 import { useDebounce } from "../hooks/useDebounce";
-import { useKey } from "../contexts/KeyContext";
-
+import { useFile } from "../contexts/FileContext";
 const Download = () => {
   const [stashKey, setStashKey] = useState("");
   const { data, isLoading, error, sendRequest } = useDownload();
-  const { downloadKey } = useKey();
   const debouncedKey = useDebounce(stashKey, 1000);
+  const { downloadUrls } = useFile();
 
   const handleInputKey = (event) => {
     setStashKey(event.target.value.trim());
@@ -18,9 +17,9 @@ const Download = () => {
   }, [debouncedKey, sendRequest]);
 
   return (
-    <div className="md:p-10 w-full">
+    <div className="w-full">
       <div className="flex flex-col items-center justify-center w-full ">
-        <div className=" flex  items-center justify-center pt-4  md:p-4 w-[70%] md:w-[50%]">
+        <div className=" flex  items-center justify-center w-[70%] md:w-[50%]">
           <input
             type="text"
             placeholder="enter-stash-key"
@@ -48,7 +47,7 @@ const Download = () => {
           {error && <span className="text-neutral-500">{error}</span>}
         </div>
       </div>
-      <div>{data && data.length > 0 && <DownloadList files={data} />}</div>
+      <div>{downloadUrls && downloadUrls.length > 0 && <DownloadList />}</div>
     </div>
   );
 };

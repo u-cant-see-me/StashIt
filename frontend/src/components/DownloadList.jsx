@@ -4,16 +4,17 @@ import { PulseLoader } from "react-spinners";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
 import ProgressBar from "./ui/ProgressBar";
-import { File } from "lucide-react";
 import { RenderPreview } from "./RenderPreview";
 import { FileIcon } from "./ui/FileIcon";
-const DownloadList = ({ files }) => {
+import { useFile } from "../contexts/FileContext";
+
+const DownloadList = () => {
   const [currFileDownloading, setCurrFileDownloading] = useState(null);
   const [progress, setProgress] = useState({});
   const [isConnecting, setIsConnecting] = useState(false);
   const preview = useRef(null);
   const [open, setOpen] = useState(false);
-
+  const { downloadUrls: files } = useFile();
   const handlePreview = (file) => {
     if (file.id === currFileDownloading) return null;
     setOpen(true);
@@ -22,7 +23,7 @@ const DownloadList = ({ files }) => {
   };
   const handleDownload = async (id) => {
     const file = files.find((f) => f.id === id);
-    console.log(file.downloadUrl.signedUrl);
+    console.log(file.downloadUrl);
     if (!file) return;
 
     try {
@@ -30,7 +31,7 @@ const DownloadList = ({ files }) => {
       setIsConnecting(true);
       setProgress({ id: file.id, percent: 0 });
 
-      const res = await fetch(file.downloadUrl.signedUrl);
+      const res = await fetch(file.downloadUrl);
       if (!res.ok) throw new Error("failed to fetch file");
 
       const contentLength = res.headers.get("Content-Length");
@@ -86,8 +87,8 @@ const DownloadList = ({ files }) => {
     }
   };
   return (
-    <div>
-      <ul className="flex flex-col justify-center items-center overflow-auto">
+    <div className=" h-100 p-4 border-b border-neutral-900">
+      <ul className="flex flex-col  items-center h-full  overflow-auto">
         {files.map((file) => (
           <li
             key={file.id}
