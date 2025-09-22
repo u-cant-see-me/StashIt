@@ -1,6 +1,11 @@
-const Nav = ({ currSection, setCurrSection }) => {
-  const setToUpload = () => setCurrSection("upload");
-  const setToDownload = () => setCurrSection("download");
+import { useSessionContext } from "../contexts/SessionContext";
+
+const Nav = () => {
+  const { sessionInfo, setSessionInfo } = useSessionContext();
+  const setToUpload = () =>
+    setSessionInfo((prev) => ({ ...prev, page: "main" }));
+  const setToDownload = () =>
+    setSessionInfo((prev) => ({ ...prev, page: "download" }));
   const underline = `absolute bottom-0 left-1/2 w-0 h-[2px] bg-black
       transform -translate-x-1/2 origin-center transition-all duration-300 ease-in-out `;
   return (
@@ -16,7 +21,7 @@ const Nav = ({ currSection, setCurrSection }) => {
             </button>
             <span
               className={`${underline} ${
-                currSection === "upload" ? "scale-x-100 w-full" : "scale-x-0"
+                sessionInfo.page === "main" ? "scale-x-100 w-full" : "scale-x-0"
               }`}
             />
           </li>
@@ -26,7 +31,9 @@ const Nav = ({ currSection, setCurrSection }) => {
             </button>
             <span
               className={`${underline} ${
-                currSection === "download" ? "scale-x-100 w-full" : "scale-x-0"
+                sessionInfo.page === "download"
+                  ? "scale-x-100 w-full"
+                  : "scale-x-0"
               }`}
             />
           </li>

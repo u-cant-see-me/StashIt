@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
 import usePersistentState from "../hooks/usePersistentState";
 import { useIndexedDb } from "../hooks/useIndexedDb";
 
@@ -14,7 +14,6 @@ export const FileProvider = ({ children }) => {
     clearAllFilesIdb,
     connected,
   } = useIndexedDb();
-  const [downloadUrls, setDownloadUrls] = useState([]);
 
   useEffect(() => {
     if (!connected) return;
@@ -30,7 +29,6 @@ export const FileProvider = ({ children }) => {
           const obj = fileObjs.find((obj) => f.fileInfo.id === obj.id);
           return obj ? { ...f, fileObj: obj.fileObj } : f;
         });
-        console.log("updated", updated);
         return updated;
       });
     };
@@ -40,8 +38,6 @@ export const FileProvider = ({ children }) => {
   const addFile = (file) => {
     setFile((prev) => [...prev, file]);
     if (connected) {
-      console.log("add", file);
-
       addFileIdb({ id: file.fileInfo.id, fileObj: file.fileObj });
     }
   };
@@ -63,16 +59,26 @@ export const FileProvider = ({ children }) => {
 
   const updateState = (update, id) => {
     setFile((prev) => {
+      let found = false;
+
       const updatedFile = prev.map((file) => {
         if (file.fileInfo.id === id) {
-          file.state = { ...file.state, ...update };
+          found = true;
+          return {
+            ...file,
+            state: { ...file.state, ...update },
+          };
         }
         return file;
       });
+
+      if (!found) {
+        console.warn(`updateState: no file found with id ${id}`);
+      }
+
       return updatedFile;
     });
   };
-
   return (
     <FileContext.Provider
       value={{
@@ -83,8 +89,6 @@ export const FileProvider = ({ children }) => {
         clearFiles,
         setExpiry,
         expiry,
-        downloadUrls,
-        setDownloadUrls,
       }}
     >
       {children}

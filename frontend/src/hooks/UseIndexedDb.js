@@ -19,7 +19,7 @@ export const useIndexedDb = () => {
       const db = event.target.result;
       dbRef.current = db;
       setConnected(true);
-      console.log("Database Opened Successfully!", db);
+      console.log("Database connected Successfully!");
     };
 
     request.onerror = (event) => {
@@ -54,7 +54,6 @@ export const useIndexedDb = () => {
       const request = store.getAll();
 
       request.onsuccess = () => {
-        console.log("fetched all files", request.result);
         resolve(request.result);
       };
       request.onerror = () => {

@@ -3,7 +3,8 @@ import { useFile } from "../contexts/FileContext";
 import axios from "axios";
 import { generateMetaData } from "../utils/utils";
 import { useKey } from "../contexts/KeyContext";
-
+import { useSessionContext } from "../contexts/SessionContext";
+import toast from "react-hot-toast";
 export const useUpload = () => {
   const { files, updateState, expiry } = useFile();
   const { addKey } = useKey();
@@ -18,7 +19,7 @@ export const useUpload = () => {
     currFile: null,
   });
   const currFile = useRef(null);
-
+  const { setSessionInfo } = useSessionContext();
   const [uploadUrls, setUploadUrls] = useState([]);
 
   const addUrls = (signedUrls) => {
@@ -65,17 +66,23 @@ export const useUpload = () => {
     id,
     maxRetries = 5
   ) => {
+    console.log("curr file uploading", fileObj.name);
+    const constroller = new AbortController();
+    const timeoutId = setTimeout(() => constroller.abort(), 20000);
+
     let attempt = 0;
     while (attempt < maxRetries) {
       try {
         await axios.put(url, fileObj, {
           headers: { "Content-Type": fileType },
+          signal: constroller.signal,
           onUploadProgress: (e) => {
             const percent = Math.round((e.loaded * 100) / e.total);
             setUploadState((prev) => ({ ...prev, progress: percent }));
             updateState({ progress: percent }, id);
           },
         });
+        clearTimeout(timeoutId);
         return "success";
       } catch (err) {
         if (!shouldRetry(err)) throw err; // skip retries on permanent errors
@@ -103,14 +110,19 @@ export const useUpload = () => {
 
   const uploadAllFiles = async (urls = uploadUrls) => {
     setUploadState((prev) => ({ ...prev, uploading: true }));
+    setSessionInfo((prev) => ({ ...prev, uploadStatus: "uploading" }));
+    for (const url of urls) {
+      console.log("url", url);
 
-    try {
-      for (const url of urls) {
-        const file = files.find((file) => file.fileInfo.id === url.id);
-        currFile.current = file;
-        setUploadState((prev) => ({ ...prev, currFile: file }));
-        updateState({ status: "uploading" }, file.fileInfo.id);
-
+      const file = files.find((file) => file.fileInfo.id === url.id);
+      if (!file) {
+        console.warn(`Skipping upload: no file found for id ${url.id}`);
+        continue;
+      }
+      currFile.current = file;
+      setUploadState((prev) => ({ ...prev, currFile: file }));
+      updateState({ status: "uploading" }, file.fileInfo.id);
+      try {
         await uploadWithRetry(
           url.uploadUrl,
           file.fileObj,
@@ -119,25 +131,32 @@ export const useUpload = () => {
         );
 
         updateState({ status: "success" }, file.fileInfo.id);
+      } catch (error) {
+        if (error.code === "ECONNABORTED") {
+          console.error("Request timed out");
+        } else if (!error.response) {
+          console.error("Network error (server unreachable)");
+        } else {
+          console.error("Server error:", error.response.status, error.message);
+        }
+        setUploadState((prev) => ({ ...prev, error: error.message }));
+        console.log(uploadState.currFile);
+        updateState(
+          { status: "error", error: error.message },
+          currFile.current.fileInfo.id
+        );
+        toast.error(error.message);
       }
-    } catch (error) {
-      if (error.code === "ECONNABORTED") {
-        console.error("Request timed out");
-      } else if (!error.response) {
-        console.error("Network error (server unreachable)");
-      } else {
-        console.error("Server error:", error.response.status, error.message);
-      }
-      setUploadState((prev) => ({ ...prev, error: error.message }));
-      console.log(uploadState.currFile);
-      updateState(
-        { status: "error", error: error.message },
-        currFile.current.fileInfo.id
-      );
-    } finally {
-      setUploadState((prev) => ({ ...prev, uploading: false }));
-      setRequestState({ status: "idle", error: null });
     }
+    console.log("done");
+
+    setUploadState((prev) => ({ ...prev, uploading: false }));
+    setRequestState({ status: "idle", error: null });
+    setSessionInfo((prev) => ({
+      ...prev,
+      uploadStatus: "finished",
+      newRequest: true,
+    }));
   };
 
   return {

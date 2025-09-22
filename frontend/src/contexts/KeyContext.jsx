@@ -4,7 +4,7 @@ import usePersistentState from "../hooks/usePersistentState";
 const KeyContext = createContext();
 
 export const KeyProvider = ({ children }) => {
-  const [key, setKey] = usePersistentState(null);
+  const [key, setKey] = usePersistentState("key", null);
   const addKey = (key) => {
     setKey(key);
   };

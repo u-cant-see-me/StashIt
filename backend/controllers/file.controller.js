@@ -2,13 +2,19 @@ import asyncHandler from "express-async-handler";
 import supabase from "../config/supabaseClient.js";
 import generatePassKey from "../utils/generatePassKey.js";
 
+// @desc   Upload file
+// @route  POST /api/file/upload
+// @access Public
 export const uploadController = asyncHandler(async (req, res) => {
   const { files, expiry } = req.body;
   if (!files) {
     res.status(400);
     throw new Error("No files provided ");
   }
-  console.log("files ", files, expiry);
+
+  if (!expiry) {
+    throw new Error({ message: "Expiration needs to be specified" });
+  }
 
   const stashKey = generatePassKey();
 
@@ -16,8 +22,6 @@ export const uploadController = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("failure in generating pass key");
   }
-
-  console.log(stashKey);
 
   const fileInfoArray = [];
   let totalSize = 0;
@@ -50,7 +54,10 @@ export const uploadController = asyncHandler(async (req, res) => {
       stash_key: stashKey,
       files: fileInfoArray,
       size: totalSize,
-      expiry,
+      expiry:
+        expiry === "once" || expiry === "30m" || expiry === "1h"
+          ? expiry
+          : "1h",
     })
     .select();
 
@@ -79,8 +86,6 @@ export const uploadController = asyncHandler(async (req, res) => {
       uploadUrl: signedUrlData.signedUrl,
       path: signedUrlData.path,
     });
-    console.log(signedUrlData);
-    console.log(signedUrlError);
   }
 
   res.status(201).json({
@@ -89,29 +94,25 @@ export const uploadController = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc   get retry urls for partially uploaded files or consumed urls
+// @route  POST /api/file/retry
+// @access Public
 export const retryUploadUrl = asyncHandler(async (req, res) => {
-  console.log(req.body);
   const { file_paths } = req.body;
-  console.log(file_paths);
-
   const signedUrl = [];
 
   for (const file_path of file_paths) {
-    console.log(file_path.path);
-
-    const { data: signedUrlData, error: signedUrlError } =
-      await supabase.storage
-        .from("stash")
-        .createSignedUploadUrl(file_path.path, 60 * 60);
-
-    console.log(signedUrlData, signedUrlError);
+    console.log(file_path);
+    let { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from("stash")
+      .createSignedUploadUrl(file_path.path, 60 * 60);
 
     if (signedUrlError && signedUrlError.statusCode === "409") {
       console.log(`File already exists: ${file_path.path}, deleting...`);
 
       const { error: deleteError } = await supabase.storage
         .from("stash")
-        .remove(file_path.path);
+        .remove([file_path.path]);
 
       if (deleteError) {
         res.status(400);
@@ -138,36 +139,36 @@ export const retryUploadUrl = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc   get download urls
+// @route  GET /api/file/download
+// @access Private
 export const downloadFileUrlController = asyncHandler(async (req, res) => {
-  console.log("Requested file data:", req.data);
   const stashData = req.data;
   const tableId = stashData.id;
 
   const files = stashData.files;
   const expiry = stashData.expiry;
 
-  if (expiry === "once") {
-    const { data, error } = await supabase
-      .from("stash")
-      .update({ used: true })
-      .eq("id", tableId)
-      .eq("used", false) //  only update if still unused
-      .select(); // return updated rows
+  const { data, error } = await supabase
+    .from("stash")
+    .update({ used: true })
+    .eq("id", tableId)
+    .eq("used", false) // only update if still unused
+    .select(); // return updated rows
 
-    if (error) {
-      console.error("Error updating key:", error.message);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-
-    if (!data || data.length === 0) {
-      // no row updated → it was already used
-      return res.status(400).json({ message: "Key already used" });
-    }
-
-    console.log("Key successfully marked as used:", tableId);
+  if (error) {
+    console.error("Error updating key:", error.message);
+    return res.status(500).json({ error: "Internal server error" });
   }
 
-  const downloadUrls = await Promise.all(
+  if (expiry === "once" && (!data || data.length === 0)) {
+    return res.status(400).json({ message: "Key already used" });
+  }
+
+  console.log("Key successfully marked as used:", tableId);
+
+  //Promise.allSettled to handle partial failures
+  const results = await Promise.allSettled(
     files.map(async (file) => {
       if (!file.file_path) throw new Error("missing file path");
 
@@ -175,11 +176,32 @@ export const downloadFileUrlController = asyncHandler(async (req, res) => {
         .from("stash")
         .createSignedUrl(file.file_path, 60 * 60);
 
-      if (signedErr) throw new Error(signedErr.message);
+      if (signedErr)
+        throw new Error(
+          `Failed to create URL for ${file.name}: ${signedErr.message}`
+        );
 
       return { ...file, downloadUrl: signed.signedUrl };
     })
   );
 
-  return res.json({ downloadUrls, createdAt: stashData.created_at });
+  const successfulFiles = [];
+  const failedFiles = [];
+
+  results.forEach((result, idx) => {
+    if (result.status === "fulfilled") {
+      successfulFiles.push(result.value);
+    } else {
+      console.error(
+        `Error generating URL for file ${files[idx].name}:`,
+        result.reason.message
+      );
+      failedFiles.push({ ...files[idx], message: result.reason.message });
+    }
+  });
+
+  return res.json({
+    downloadUrls: successfulFiles,
+    createdAt: stashData.created_at,
+  });
 });

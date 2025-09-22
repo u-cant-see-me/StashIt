@@ -22,7 +22,6 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   req.data = { ...data[0] };
-  console.log("auth", req.data);
 
   next();
 });

@@ -6,6 +6,7 @@ import Modal from "./Modal";
 import toast from "react-hot-toast";
 import UploadMenu from "./ui/UploadMenu";
 import TextInputModal from "./ui/TextInputModal";
+import { Plus } from "lucide-react";
 
 const AddFile = () => {
   const { addFile } = useFile();
@@ -94,7 +95,7 @@ const AddFile = () => {
     <div className="md:absolute md:top-0 md:left-0 relative">
       {/* Desktop trigger */}
       <div
-        className="hidden md:block relative h-20 w-20"
+        className="hidden lg:block relative h-20 w-20"
         onClick={() => setShowMenu((prev) => !prev)}
       >
         <div className={`${sonarWave} sonar-delay-1 z-0`}></div>
@@ -102,14 +103,16 @@ const AddFile = () => {
         <div className={`${sonarWave} sonar-delay-3 z-0`}></div>
 
         <div className="absolute cursor-pointer inset-0 flex items-center justify-center bg-white text-black rounded-full z-10">
-          <span className="text-3xl">+</span>
+          <span>
+            <Plus size={25} />
+          </span>
         </div>
       </div>
 
       {/* Mobile trigger */}
       <button
         type="button"
-        className="md:hidden bg-white text-black outline-none w-10 h-10 rounded-lg"
+        className="lg:hidden bg-white text-black outline-none w-10 h-10 rounded-lg"
         onClick={() => setShowMenu((prev) => !prev)}
       >
         <span className="text-xl">+</span>

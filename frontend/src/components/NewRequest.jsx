@@ -1,48 +1,57 @@
 import { useFile } from "../contexts/FileContext";
 import { useKey } from "../contexts/KeyContext";
-import { Check, X } from "lucide-react";
 import KeyHolder from "./KeyHolder";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
+import { useSessionContext } from "../contexts/SessionContext";
+import { PulseLoader } from "react-spinners";
 
-const NewRequest = ({ setUploadDone, retry }) => {
+const NewRequest = ({ retry, isConnecting }) => {
   const { files, clearFiles, updateState } = useFile();
   const { key, removeKey } = useKey();
-  const failedFile = useRef([]);
+  const [failedFile, setFailedFiles] = useState([]);
+  const { setSessionInfo } = useSessionContext();
 
   useEffect(() => {
-    failedFile.current = [];
+    const f = [];
     for (const file of files) {
       if (file.state.status === "pending" || file.state.status === "error") {
-        console.log(file.fileInfo.name);
-
-        failedFile.current.push(file);
+        f.push(file);
         updateState({ status: "error" }, file.fileInfo.id);
       }
     }
+    setFailedFiles(f);
   }, []);
 
   const handleNewRequest = () => {
     sessionStorage.removeItem("page");
     clearFiles();
     removeKey();
-    setUploadDone(false);
+    setSessionInfo((prev) => ({
+      ...prev,
+      uploadStatus: "idle",
+      newRequest: false,
+    }));
   };
   return (
-    <div className="flex flex-col items-center justify-center  p-6 space-y-4">
+    <div className="relative flex flex-col items-center justify-center  p-6 space-y-4">
       <p className="text-green-400 text-lg font-semibold">
-        Uploaded files {files.length - failedFile.current.length}/{files.length}
-        !
+        Uploaded files {files.length - failedFile.length}/{files.length}!
       </p>
-      {failedFile.current.length > 0 && (
+      {failedFile.length > 0 && (
         <button
           type="button"
-          className="py-2 px-4 bg-red-400 text-white"
-          onClick={() => retry(failedFile.current)}
+          className="absolute top-0 right-0 py-2 px-4 bg-red-400 text-white"
+          onClick={() => {
+            console.log(failedFile);
+
+            retry(failedFile);
+          }}
+          // disabled={!isConnecting}
         >
-          Retry All
+          {isConnecting ? <PulseLoader size={5} color="#fff" /> : "Retry All"}
         </button>
       )}
-      {key && files.length - failedFile.current.length > 0 && <KeyHolder />}
+      {key && files.length - failedFile.length > 0 && <KeyHolder />}
 
       <button
         onClick={handleNewRequest}

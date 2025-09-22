@@ -1,14 +1,13 @@
 import { useCallback, useState } from "react";
 import axios from "axios";
 import { isValidStashKey } from "../utils/utils";
-import { useFile } from "../contexts/FileContext";
+import { useSessionContext } from "../contexts/SessionContext";
 
 export const useDownload = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { setDownloadUrls } = useFile();
-
+  const { setDownloadUrls } = useSessionContext();
   const sendRequest = useCallback(async (stashKey) => {
     if (isValidStashKey(stashKey)) {
       const url = `${import.meta.env.VITE_BASE_URL}/api/file/download`;
@@ -19,6 +18,8 @@ export const useDownload = () => {
       try {
         const res = await axios.get(url, { params: { stashKey } });
         const { downloadUrls } = await res.data;
+        console.log("download", downloadUrls);
+
         setData(downloadUrls);
         setDownloadUrls(downloadUrls);
         setIsLoading(false);

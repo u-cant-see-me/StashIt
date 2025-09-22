@@ -6,7 +6,7 @@ import Modal from "./Modal";
 import ProgressBar from "./ui/ProgressBar";
 import { RenderPreview } from "./RenderPreview";
 import { FileIcon } from "./ui/FileIcon";
-import { useFile } from "../contexts/FileContext";
+import { useSessionContext } from "../contexts/SessionContext";
 
 const DownloadList = () => {
   const [currFileDownloading, setCurrFileDownloading] = useState(null);
@@ -14,12 +14,11 @@ const DownloadList = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const preview = useRef(null);
   const [open, setOpen] = useState(false);
-  const { downloadUrls: files } = useFile();
+  const { downloadUrls: files } = useSessionContext();
   const handlePreview = (file) => {
     if (file.id === currFileDownloading) return null;
     setOpen(true);
     preview.current = file;
-    console.log(preview);
   };
   const handleDownload = async (id) => {
     const file = files.find((f) => f.id === id);
@@ -92,7 +91,7 @@ const DownloadList = () => {
         {files.map((file) => (
           <li
             key={file.id}
-            className="relative w-full md:w-[70%] flex items-center justify-between text-sm font-mono border-b p-4
+            className="relative w-full lg:w-[70%] flex items-center justify-between text-sm font-mono border-b p-4
                  border-neutral-900
  "
             onClick={() => handlePreview(file)}
@@ -110,7 +109,10 @@ const DownloadList = () => {
               {currFileDownloading !== file.id ? (
                 <button
                   type="button "
-                  onClick={() => handleDownload(file.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(file.id);
+                  }}
                   disabled={currFileDownloading === file.id}
                 >
                   <Download color="#c0c0c0ff" size={20} />

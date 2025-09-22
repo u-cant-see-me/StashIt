@@ -2,28 +2,21 @@ import "./App.css";
 import Main from "./components/Main";
 import Nav from "./components/Nav";
 import { Toaster } from "react-hot-toast";
-import NetworkProvider from "./contexts/NetworkContext";
-import { useState } from "react";
-import { KeyProvider } from "./contexts/KeyContext";
 import Download from "./components/Download";
+import { useSessionContext } from "./contexts/SessionContext";
 
 function App() {
-  const [currSection, setCurrSection] = useState("upload");
-
+  const { sessionInfo } = useSessionContext();
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="bottom-right" reverseOrder={false} />
 
-      {/* <NetworkProvider> */}
       <div className="h-screen w-screen px-4 sm:px-10 md:px-20 pt-5  ">
-        <Nav setCurrSection={setCurrSection} currSection={currSection} />
-        <KeyProvider>
-          <div className="h-[90%] bg-neutral-950 font-mono p-4 md:p-10 rounded-tl-2xl rounded-tr-2xl text-neutral-200">
-            {currSection === "upload" ? <Main /> : <Download />}
-          </div>
-        </KeyProvider>
+        <Nav />
+        <div className="h-[90%] bg-neutral-950 font-mono p-4 md:p-10 rounded-tl-2xl rounded-tr-2xl text-neutral-200">
+          {sessionInfo.page === "main" ? <Main /> : <Download />}
+        </div>
       </div>
-      {/* </NetworkProvider> */}
     </>
   );
 }

@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import DownloadList from "./DownloadList";
 import { useDownload } from "../hooks/UseDownload";
 import { useDebounce } from "../hooks/useDebounce";
-import { useFile } from "../contexts/FileContext";
+import { useSessionContext } from "../contexts/SessionContext";
 const Download = () => {
   const [stashKey, setStashKey] = useState("");
   const { data, isLoading, error, sendRequest } = useDownload();
   const debouncedKey = useDebounce(stashKey, 1000);
-  const { downloadUrls } = useFile();
+  const { downloadUrls } = useSessionContext();
 
   const handleInputKey = (event) => {
     setStashKey(event.target.value.trim());
