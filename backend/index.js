@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import fileRoutes from "./routes/file.route.js";
-import errorHandler from "../../ChatApp/backend/middleware/errorHandler.js";
+import errorHandler from "./middlewares/errorHandler.js";
 import cors from "cors";
 
 dotenv.config();
