@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import usePersistentState from "../hooks/usePersistentState";
+import usePersistentState from "../hooks/UsePersistentState";
 
 const SessionContext = createContext();
 

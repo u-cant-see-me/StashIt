@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import AddFile from "./AddFile";
 import { useFile } from "../contexts/FileContext";
 import NewRequest from "./NewRequest";
@@ -6,7 +6,7 @@ import { PulseLoader } from "react-spinners";
 import { useUpload } from "../hooks/useUpload";
 import ProgressBar from "./ui/ProgressBar";
 import ExpiresIn from "./ExpiresIn";
-import { useRetry } from "../hooks/useRetry";
+import { useRetry } from "../hooks/UseRetry";
 import { useSessionContext } from "../contexts/SessionContext";
 const Main = () => {
   const endRef = useRef(null);

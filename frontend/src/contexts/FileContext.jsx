@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect } from "react";
-import usePersistentState from "../hooks/usePersistentState";
-import { useIndexedDb } from "../hooks/useIndexedDb";
+import usePersistentState from "../hooks/UsePersistentState";
+import { useIndexedDb } from "../hooks/UseIndexedDb";
 
 const FileContext = createContext();
 

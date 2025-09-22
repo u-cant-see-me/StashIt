@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DownloadList from "./DownloadList";
 import { useDownload } from "../hooks/UseDownload";
-import { useDebounce } from "../hooks/useDebounce";
+import { useDebounce } from "../hooks/UseDebounce";
 import { useSessionContext } from "../contexts/SessionContext";
 const Download = () => {
   const [stashKey, setStashKey] = useState("");
