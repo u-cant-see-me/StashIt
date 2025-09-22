@@ -1,4 +1,22 @@
 {
+  "name": "stashit",
+  "version": "1.0.0",
+  "description": "StashIt - A file upload and sharing application with signed URLs and expiry keys",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"Run frontend or backend separately\"",
+    "start": "echo \"Start your frontend or backend separately\""
+  },
+  "keywords": [
+    "stashit",
+    "file-upload",
+    "supabase",
+    "react",
+    "nodejs"
+  ],
+  "author": "Yash Gupta",
+  "license": "ISC",
   "devDependencies": {
     "supabase": "^2.40.7"
   }
