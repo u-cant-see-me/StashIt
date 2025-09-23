@@ -30,6 +30,7 @@ const Download = () => {
               max-w-md
               px-0
               py-2
+              text-sm sm:text-lg
               bg-transparent
               border-b
               border-neutral-700

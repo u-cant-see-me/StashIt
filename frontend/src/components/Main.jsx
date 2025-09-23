@@ -65,10 +65,10 @@ const Main = () => {
       </div>
       <div className="w-full md:w-[80%]">
         <div>
-          <div className="p-4 h-60 overflow-auto border border-neutral-900 rounded-lg">
+          <div className="p-4 h-100 sm:h-60 overflow-auto border border-neutral-900 rounded-lg">
             <ul className="space-y-2 ">
               {files.length === 0 && (
-                <li className="text-sm text-neutral-500">
+                <li className="text-xs sm:text-sm text-neutral-500">
                   <p>Press + to add files</p>
                   <p>Files must not exceed 50 MB</p>
                 </li>
