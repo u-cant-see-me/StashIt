@@ -38,7 +38,7 @@ export const uploadController = asyncHandler(async (req, res) => {
       throw new Error("file should be less than 50 Mb");
     }
 
-    const uniqueFileName = `${Date.now() + file.id}-${fileName}`;
+    const uniqueFileName = `${Date.now() + file.id}`;
 
     const filePath = `${stashKey}/${uniqueFileName}`;
 
