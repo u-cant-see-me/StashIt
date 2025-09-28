@@ -18,6 +18,7 @@ function App() {
           {sessionInfo.page === "main" ? <Main /> : <Download />}
         </div>
       </div>
+      <SpeedInsights />
     </>
   );
 }
