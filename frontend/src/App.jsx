@@ -13,7 +13,7 @@ function App() {
 
       <div className="h-screen w-screen px-1 sm:px-10 md:px-20 pt-5  ">
         <Nav />
-        <div className="h-[90%] bg-neutral-950 font-mono p-4 md:p-10 rounded-tl-2xl rounded-tr-2xl text-neutral-200">
+        <div className="min-h-[90%] bg-neutral-950 font-mono p-4 md:p-10 rounded-2xl text-neutral-200">
           {sessionInfo.page === "main" ? <Main /> : <Download />}
         </div>
       </div>
