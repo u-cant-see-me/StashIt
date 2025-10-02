@@ -1,12 +1,12 @@
-import { convertToFile, formatBytes, getDate } from "../utils/utils";
+import { convertToFile, getDate } from "../utils/utils";
 import { useFile } from "../contexts/FileContext";
-import { nanoid } from "nanoid";
 import { useState, useRef, useEffect } from "react";
 import Modal from "./Modal";
 import toast from "react-hot-toast";
 import UploadMenu from "./ui/UploadMenu";
 import TextInputModal from "./ui/TextInputModal";
 import { Plus } from "lucide-react";
+import { generateFileObj } from "../utils/fileObj";
 
 const AddFile = () => {
   const { addFile } = useFile();
@@ -33,28 +33,7 @@ const AddFile = () => {
     const fileArr = Array.from(e.target.files);
 
     for (const file of fileArr) {
-      const updatedFile = {
-        fileInfo: {
-          id: nanoid(8),
-          name: file.name,
-          type: file.type
-            ? file.type
-            : file.name.split(".").length > 1
-            ? file.name.split(".").pop()
-            : "Unknown",
-          size: file.size,
-          formattedSize: formatBytes(file.size),
-        },
-        fileObj: file,
-        state: {
-          status: "pending",
-          progress: 0,
-          error: null,
-          aborted: false,
-          uploadUrl: null,
-        },
-      };
-
+      const updatedFile = generateFileObj(file);
       addFile(updatedFile);
     }
   };
@@ -64,23 +43,7 @@ const AddFile = () => {
     if (content) {
       const title = titleRef.current.value || "Untitled-" + getDate();
       const file = convertToFile(content, title.trim());
-      const snippet = {
-        fileInfo: {
-          id: nanoid(8),
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          formattedSize: formatBytes(file.size),
-        },
-        fileObj: file,
-        state: {
-          status: "pending",
-          progress: 0,
-          error: null,
-          aborted: false,
-          uploadUrl: null,
-        },
-      };
+      const snippet = generateFileObj(file);
       addFile(snippet);
       setShowModal(false);
     } else {

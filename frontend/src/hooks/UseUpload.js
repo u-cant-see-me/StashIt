@@ -8,10 +8,6 @@ import toast from "react-hot-toast";
 export const useUpload = () => {
   const { files, updateState, expiry } = useFile();
   const { addKey } = useKey();
-  const [requestState, setRequestState] = useState({
-    status: "idle", //idle / connecting /connected
-    error: null,
-  });
   const [uploadState, setUploadState] = useState({
     uploading: false,
     progress: 0,
@@ -19,7 +15,7 @@ export const useUpload = () => {
     currFile: null,
   });
   const currFile = useRef(null);
-  const { setSessionInfo } = useSessionContext();
+  const { setSessionInfo, requestState, setRequestState } = useSessionContext();
   const [uploadUrls, setUploadUrls] = useState([]);
 
   const addUrls = (signedUrls) => {
@@ -31,6 +27,7 @@ export const useUpload = () => {
   const sendRequest = async () => {
     try {
       setRequestState({ status: "connecting", error: "null" });
+      setSessionInfo((prev) => ({ ...prev, uploadStatus: "requesting" }));
 
       const metadata = generateMetaData(files);
 
@@ -51,6 +48,7 @@ export const useUpload = () => {
       return signedUrls;
     } catch (error) {
       setRequestState({ status: "error", error: error.message });
+      setSessionInfo((prev) => ({ ...prev, uploadStatus: "idle" }));
 
       console.error(error.message);
     }
@@ -66,9 +64,14 @@ export const useUpload = () => {
     id,
     maxRetries = 5
   ) => {
+    const timeoutMs = 5 * 60 * 1000;
     console.log("curr file uploading", fileObj.name);
     const constroller = new AbortController();
-    const timeoutId = setTimeout(() => constroller.abort(), 20000);
+    const timeoutId = setTimeout(() => {
+      console.log("aborted");
+      toast.error("Request time out");
+      constroller.abort();
+    }, timeoutMs);
 
     let attempt = 0;
     while (attempt < maxRetries) {
