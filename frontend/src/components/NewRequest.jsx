@@ -11,7 +11,7 @@ const NewRequest = ({ retry, isConnecting }) => {
   const [failedFile, setFailedFiles] = useState([]);
   const { setSessionInfo } = useSessionContext();
 
-  useEffect(() => {
+  const findFailedFiles = () => {
     const f = [];
     for (const file of files) {
       if (file.state.status === "pending" || file.state.status === "error") {
@@ -19,8 +19,15 @@ const NewRequest = ({ retry, isConnecting }) => {
         updateState({ status: "error" }, file.fileInfo.id);
       }
     }
-    setFailedFiles(f);
+    return f;
+  };
+  useEffect(() => {
+    setFailedFiles(findFailedFiles());
   }, []);
+  const handleRetry = async () => {
+    await retry(failedFile);
+    setFailedFiles(findFailedFiles());
+  };
 
   const handleNewRequest = () => {
     sessionStorage.removeItem("page");
@@ -41,11 +48,7 @@ const NewRequest = ({ retry, isConnecting }) => {
         <button
           type="button"
           className="absolute top-0 right-0 py-2 px-4 bg-red-400 text-white"
-          onClick={() => {
-            console.log(failedFile);
-
-            retry(failedFile);
-          }}
+          onClick={handleRetry}
           // disabled={!isConnecting}
         >
           {isConnecting ? <PulseLoader size={5} color="#fff" /> : "Retry All"}
