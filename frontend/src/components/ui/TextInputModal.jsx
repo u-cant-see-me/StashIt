@@ -17,7 +17,7 @@ const TextInputModal = ({ titleRef, contentRef, setShowModal, handleSave }) => {
         placeholder="Write something here..."
         ref={contentRef}
         autoFocus
-        className="w-full resize-none p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-800"
+        className="w-full min-h-50 sm:min-h-70 text-xs resize-none p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-800"
       />
 
       <div className="flex justify-end gap-3">
