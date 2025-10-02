@@ -10,11 +10,22 @@ export const SessionProvider = ({ children }) => {
     newRequest: false,
     error: null,
   });
+  const [requestState, setRequestState] = usePersistentState("requestState", {
+    status: "idle", //idle / connecting /connected
+    error: null,
+  });
   const [downloadUrls, setDownloadUrls] = useState([]);
 
   return (
     <SessionContext.Provider
-      value={{ sessionInfo, setSessionInfo, downloadUrls, setDownloadUrls }}
+      value={{
+        sessionInfo,
+        setSessionInfo,
+        downloadUrls,
+        setDownloadUrls,
+        requestState,
+        setRequestState,
+      }}
     >
       {children}
     </SessionContext.Provider>
