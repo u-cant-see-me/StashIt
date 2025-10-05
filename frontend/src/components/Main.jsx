@@ -1,18 +1,15 @@
-import { useEffect, useRef } from "react";
 import AddFile from "./AddFile";
 import { useFile } from "../contexts/FileContext";
 import NewRequest from "./NewRequest";
 import { PulseLoader } from "react-spinners";
 import { useUpload } from "../hooks/UseUpload";
-import ProgressBar from "./ui/ProgressBar";
 import ExpiresIn from "./ExpiresIn";
 import { useRetry } from "../hooks/UseRetry";
 import { useSessionContext } from "../contexts/SessionContext";
+import FileList from "./FileList";
 const Main = () => {
-  const endRef = useRef(null);
-  const { files, removeFile, expiry, setExpiry, updateState } = useFile();
-  const { sendRequest, uploadAllFiles, uploadState, requestState } =
-    useUpload();
+  const { files, expiry, setExpiry, updateState } = useFile();
+  const { sendRequest, uploadAllFiles, requestState } = useUpload();
   const { retryRequest, isConnecting } = useRetry();
   const { sessionInfo } = useSessionContext();
 
@@ -54,9 +51,6 @@ const Main = () => {
     await uploadAllFiles(retryUrls);
     console.log("done");
   };
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [files]);
 
   return (
     <div className="relative flex flex-col items-center justify-center ">
@@ -65,74 +59,7 @@ const Main = () => {
       </div>
       <div className="w-full md:w-[80%]">
         <div>
-          <div className="p-4 h-100 sm:h-60 overflow-auto border border-neutral-900 rounded-lg">
-            <ul className="space-y-2 ">
-              {files.length === 0 && (
-                <li className="text-xs sm:text-sm text-neutral-500">
-                  <p>Press + to add files</p>
-                  <p>Files must not exceed 50 MB</p>
-                </li>
-              )}
-
-              {files.map((file) => (
-                <li
-                  key={file.fileInfo.id}
-                  ref={file.state.status === "uploading" ? endRef : null}
-                  className="relative flex space-x-4 border-b border-neutral-800 pb-2 last:border-none"
-                >
-                  <button
-                    className="text-neutral-500 hover:text-red-400 text-sm"
-                    onClick={() => removeFile(file.fileInfo.id)}
-                  >
-                    ✕
-                  </button>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-neutral-300">
-                      {file.fileInfo.name}
-                    </p>
-                    <p
-                      className={`text-xs ${
-                        file.fileInfo.formattedSize.valid
-                          ? "text-neutral-500"
-                          : "text-red-400"
-                      }`}
-                    >
-                      {file.fileInfo.formattedSize.size}
-                    </p>
-                  </div>
-                  <span className="flex-1 flex items-center justify-end">
-                    {file.state.status !== "uploading" ? (
-                      <span
-                        className={`text-sm ${
-                          file.state.status === "pending"
-                            ? "text-yellow-400"
-                            : file.state.status === "success"
-                            ? "text-green-400"
-                            : "text-red-400"
-                        }`}
-                      >
-                        {file.state.status !== "error" ? (
-                          file.state.status
-                        ) : (
-                          <button type="button" onClick={() => retry([file])}>
-                            Retry
-                          </button>
-                        )}
-                      </span>
-                    ) : (
-                      <span className="text-green-400 text-xs font-mono">
-                        {file.state.progress}%
-                      </span>
-                    )}
-                  </span>
-                  {file.state.status === "uploading" && (
-                    <ProgressBar percent={file.state.progress} />
-                  )}
-                </li>
-              ))}
-              {files.length > 0 && <div ref={endRef} />}
-            </ul>
-          </div>
+          <FileList retry={retry} />
           <ExpiresIn value={expiry} onChange={setExpiry} />
         </div>
 
