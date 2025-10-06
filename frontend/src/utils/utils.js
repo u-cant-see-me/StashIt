@@ -25,7 +25,8 @@ export const generateMetaData = (files) => {
 
 export const convertToFile = (text, title) => {
   const blob = new Blob([text], { type: "text/plain" });
-  return new File([blob], `${title}.txt`, { type: "text/plain" });
+  const t = title.slice(-3) === "txt" ? title : title + ".txt";
+  return new File([blob], t, { type: "text/plain" });
 };
 
 export const getDate = () => {
