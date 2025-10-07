@@ -1,13 +1,22 @@
 import { useFile } from "../contexts/FileContext";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ProgressBar from "./ui/ProgressBar";
 import { useDropzone } from "react-dropzone";
 import { generateFileObj } from "../utils/fileObj";
 import { useSessionContext } from "../contexts/SessionContext";
 import toast from "react-hot-toast";
+import Modal from "./Modal";
+import { RenderPreview } from "./RenderPreview";
+import { FileIcon } from "./ui/FileIcon";
+import TextEditModal from "./ui/TextEditModal";
+import { isDocx } from "../utils/utils";
 const FileList = ({ retry }) => {
-  const { files, addFile, removeFile } = useFile();
+  const { files, addFile, removeFile, clearFiles } = useFile();
   const { sessionInfo } = useSessionContext();
+  const [open, setOpen] = useState(false);
+  const preview = useRef(null);
+  const [openTextEditor, setOpenTextEditor] = useState(false);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (droppedFiles) => {
       if (sessionInfo.uploadStatus !== "idle") {
@@ -26,6 +35,24 @@ const FileList = ({ retry }) => {
     noKeyboard: true,
   });
 
+  const handlePreview = (f) => {
+    preview.current = {
+      type: f.fileInfo.type,
+      url: URL.createObjectURL(f.fileObj),
+    };
+    if (
+      sessionInfo.uploadStatus === "idle" &&
+      f.fileInfo.type.includes("text")
+    ) {
+      setOpenTextEditor(true);
+      preview.current.file = f;
+    } else if (isDocx(f.fileInfo.type)) {
+      setOpen(true);
+      preview.current.file = f;
+    } else {
+      setOpen(true);
+    }
+  };
   const endRef = useRef(null);
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,10 +60,10 @@ const FileList = ({ retry }) => {
   return (
     <div
       {...getRootProps()}
-      className={`p-4 h-100 sm:h-60 overflow-auto border 
+      className={`p-4 h-50 sm:h-60 overflow-auto border 
     ${
       isDragActive && sessionInfo.uploadStatus === "idle"
-        ? "border-dashed border-[#5c5c5cff] "
+        ? "border-dashed border-[#5c5c5cff] bg-gray-900/40 "
         : "border-solid border-neutral-900"
     }
        rounded-lg`}
@@ -56,29 +83,37 @@ const FileList = ({ retry }) => {
             key={file.fileInfo.id}
             ref={file.state.status === "uploading" ? endRef : null}
             className="relative flex space-x-4 border-b border-neutral-800 pb-2 last:border-none"
+            onClick={() => handlePreview(file)}
           >
-            <button
-              className="text-neutral-500 hover:text-red-400 text-sm"
-              onClick={() => removeFile(file.fileInfo.id)}
-            >
-              ✕
-            </button>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-neutral-300">
+            <div className="min-w-0 w-full space-y-2">
+              <p className="truncate text-sm max-w-[95%] font-medium text-neutral-300">
                 {file.fileInfo.name}
               </p>
               <p
-                className={`text-xs ${
+                className={`flex gap-2 text-xs ${
                   file.fileInfo.formattedSize.valid
                     ? "text-neutral-500"
                     : "text-red-400"
                 }`}
               >
                 {file.fileInfo.formattedSize.size}
+                <span>
+                  <FileIcon type={file.fileInfo.type} />
+                </span>
               </p>
             </div>
             <span className="flex-1 flex items-center justify-end">
-              {file.state.status !== "uploading" ? (
+              {file.state.status === "pending" ? (
+                <button
+                  className="text-neutral-500 hover:text-red-400 text-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile(file.fileInfo.id);
+                  }}
+                >
+                  ✕
+                </button>
+              ) : file.state.status !== "uploading" ? (
                 <span
                   className={`text-sm ${
                     file.state.status === "pending"
@@ -110,12 +145,37 @@ const FileList = ({ retry }) => {
         {files.length > 0 && sessionInfo.uploadStatus === "idle" && (
           <div
             ref={endRef}
-            className="text-center text-[#5c5c5cff] text-xs sm:text-sm text-neutral-500"
+            className="flex justify-between text-xs sm:text-sm text-neutral-500"
           >
-            {isDragActive ? "Drop files here" : "Drag and drop files.."}
+            <span className="flex-1" />
+            <p className="flex-1">
+              {isDragActive ? "Drop files here" : "Drag and drop files.."}
+            </p>
+            <span>
+              <button
+                type="button"
+                className="flex-1 bg-neutral-900 px-2 py-1 rounded-md hover:text-neutral-400 "
+                onClick={() => clearFiles()}
+              >
+                Clear
+              </button>
+            </span>
           </div>
         )}
       </ul>
+      {open && (
+        <Modal onClose={() => setOpen(false)} preview={true}>
+          <RenderPreview preview={preview} setOpen={setOpen} />
+        </Modal>
+      )}
+      {openTextEditor && (
+        <Modal onClose={() => setOpen(false)} preview={false}>
+          <TextEditModal
+            file={preview.current.file}
+            setShowModal={setOpenTextEditor}
+          />
+        </Modal>
+      )}
     </div>
   );
 };
