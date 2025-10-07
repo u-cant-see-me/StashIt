@@ -10,7 +10,7 @@ export const SessionProvider = ({ children }) => {
     newRequest: false,
     error: null,
   });
-  const [requestState, setRequestState] = usePersistentState("requestState", {
+  const [requestState, setRequestState] = useState({
     status: "idle", //idle / connecting /connected
     error: null,
   });
