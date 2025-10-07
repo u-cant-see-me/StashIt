@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import CopyBtn from "./ui/CopyBtn";
 import toast from "react-hot-toast";
-import { renderAsync } from "docx-preview";
 import { isDocx } from "../utils/utils";
 export const RenderPreview = ({ preview, setOpen }) => {
   const { type, url } = preview.current;
@@ -32,14 +31,17 @@ export const RenderPreview = ({ preview, setOpen }) => {
       }
     };
     const renderDoc = async (buffer) => {
-      containerRef.current.innerHTML = "";
-      await renderAsync(buffer, containerRef.current, null, {
-        className: "docx",
-        inWrapper: true,
-        ignoreWidth: false,
-        ignoreHeight: false,
-        breakPages: true,
-      });
+      const { renderAsync } = await import("docx-preview");
+      if (renderAsync) {
+        containerRef.current.innerHTML = "";
+        await renderAsync(buffer, containerRef.current, null, {
+          className: "docx",
+          inWrapper: true,
+          ignoreWidth: false,
+          ignoreHeight: false,
+          breakPages: true,
+        });
+      }
     };
     const loadFiles = async () => {
       try {
