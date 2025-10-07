@@ -51,7 +51,9 @@ const ExpiresIn = ({ value, onChange }) => {
         <option value="elon">elon</option>
         <option value="author">author</option>
       </select>
-      <span className="text-xs text-neutral-800">{comments}</span>
+      <span className="hidden sm:block text-xs text-neutral-800">
+        {comments}
+      </span>
     </div>
   );
 };

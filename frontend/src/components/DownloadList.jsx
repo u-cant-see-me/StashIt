@@ -18,7 +18,7 @@ const DownloadList = () => {
   const handlePreview = (file) => {
     if (file.id === currFileDownloading) return null;
     setOpen(true);
-    preview.current = file;
+    preview.current = { type: file.type, url: file.downloadUrl };
   };
   const handleDownload = async (id) => {
     const file = files.find((f) => f.id === id);
@@ -85,9 +85,14 @@ const DownloadList = () => {
       setIsConnecting(false);
     }
   };
+  // const downloadAll = async () => {
+  //   for (const file of files) {
+  //     await handleDownload(file.id);
+  //   }
+  // };
   return (
-    <div className=" h-100 p-4 border-b border-neutral-900">
-      <ul className="flex flex-col  items-center h-full  overflow-auto">
+    <div className="h-100  p-4 border-b border-neutral-900">
+      <ul className="flex flex-col  items-center h-full overflow-auto">
         {files.map((file) => (
           <li
             key={file.id}
@@ -96,8 +101,10 @@ const DownloadList = () => {
  "
             onClick={() => handlePreview(file)}
           >
-            <div className="min-w-0">
-              <p className="truncate text-neutral-300">{file.name}</p>
+            <div className="min-w-0 w-full">
+              <p className="truncate w-full max-w-[90%] text-neutral-300">
+                {file.name}
+              </p>
               <p className="flex gap-2 text-neutral-500">
                 <span>{file.formattedSize.size}</span>
                 <span className="flex items-center justify-center">
@@ -133,7 +140,7 @@ const DownloadList = () => {
       </ul>
       {open && (
         <Modal onClose={() => setOpen(false)} preview={true}>
-          <RenderPreview preview={preview} />
+          <RenderPreview preview={preview} setOpen={setOpen} />
         </Modal>
       )}
     </div>

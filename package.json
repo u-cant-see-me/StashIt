@@ -19,5 +19,8 @@
   "license": "ISC",
   "devDependencies": {
     "supabase": "^2.40.7"
+  },
+  "dependencies": {
+    "docx-preview": "^0.3.7"
   }
 }

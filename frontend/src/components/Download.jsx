@@ -5,7 +5,7 @@ import { useDebounce } from "../hooks/UseDebounce";
 import { useSessionContext } from "../contexts/SessionContext";
 const Download = () => {
   const [stashKey, setStashKey] = useState("");
-  const { data, isLoading, error, sendRequest } = useDownload();
+  const { isLoading, error, sendRequest } = useDownload();
   const debouncedKey = useDebounce(stashKey, 1000);
   const { downloadUrls } = useSessionContext();
 
@@ -19,18 +19,18 @@ const Download = () => {
   return (
     <div className="w-full">
       <div className="flex flex-col items-center justify-center w-full ">
-        <div className=" flex  items-center justify-center w-[70%] md:w-[50%]">
+        <div className=" flex  items-center justify-center  w-full md:w-[50%] ">
           <input
             type="text"
             placeholder="enter-stash-key"
             onChange={handleInputKey}
             value={stashKey}
             className="
-              w-full m-2 
+              flex-2 m-2 
               max-w-md
               px-0
               py-2
-              text-sm sm:text-lg
+              text-sm sm:text-base
               bg-transparent
               border-b
               border-neutral-700
@@ -42,6 +42,15 @@ const Download = () => {
               duration-200
             "
           />
+          {/* <span className="flex flex-1 items-center justify-center">
+            <button
+              type="button"
+              // onClick={downloadAll}
+              className="text-xs sm:text-sm text-neutral-500 bg-neutral-900 px-2 py-1 rounded-md hover:text-neutral-400 "
+            >
+              Download All
+            </button>
+          </span> */}
         </div>
         <div className="text-sm mb-2">
           {isLoading && <span className="text-neutral-600">Searching ...</span>}

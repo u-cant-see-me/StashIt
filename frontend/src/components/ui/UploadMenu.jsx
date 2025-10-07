@@ -1,4 +1,4 @@
-const UploadMenu = ({ menuRef, fileInputRef, handleChange, setShowModal }) => {
+const UploadMenu = ({ menuRef, fileInputRef, setShowModal }) => {
   return (
     <div
       ref={menuRef}
@@ -7,18 +7,9 @@ const UploadMenu = ({ menuRef, fileInputRef, handleChange, setShowModal }) => {
       <ul className="w-40 bg-neutral-900 text-white rounded-xl shadow-lg overflow-hidden animate-fadeIn">
         <li
           className="px-4 py-3 flex items-center gap-2 hover:bg-neutral-700 cursor-pointer transition"
-          onClick={() => {
-            fileInputRef.current.click();
-          }}
+          onClick={() => fileInputRef.current.click()}
         >
           📁 <span>Files</span>
-          <input
-            type="file"
-            multiple
-            className="hidden"
-            ref={fileInputRef}
-            onChange={handleChange}
-          />
         </li>
         <li
           className="px-4 py-3 flex items-center gap-2 hover:bg-neutral-700 cursor-pointer transition"

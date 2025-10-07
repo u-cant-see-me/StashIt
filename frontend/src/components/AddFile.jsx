@@ -57,6 +57,13 @@ const AddFile = () => {
   return (
     <div className="md:absolute md:top-0 md:left-0 relative">
       {/* Desktop trigger */}
+      <input
+        type="file"
+        multiple
+        className="hidden"
+        ref={fileInputRef}
+        onChange={handleChange}
+      />
       <div
         className="hidden lg:block relative h-20 w-20"
         onClick={() => setShowMenu((prev) => !prev)}
@@ -85,7 +92,6 @@ const AddFile = () => {
         <UploadMenu
           menuRef={menuRef}
           fileInputRef={fileInputRef}
-          handleChange={handleChange}
           setShowModal={setShowModal}
         />
       )}

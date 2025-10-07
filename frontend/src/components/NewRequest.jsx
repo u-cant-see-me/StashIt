@@ -40,8 +40,8 @@ const NewRequest = ({ retry, isConnecting }) => {
     }));
   };
   return (
-    <div className="relative flex flex-col items-center justify-center  p-6 space-y-4">
-      <p className="text-green-400 text-lg font-semibold">
+    <div className="relative flex flex-col items-center justify-center   space-y-4">
+      <p className="text-green-400 text-sm sm:text-lg font-semibold">
         Uploaded files {files.length - failedFile.length}/{files.length}!
       </p>
       {failedFile.length > 0 && (
