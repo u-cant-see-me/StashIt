@@ -5,7 +5,6 @@ import { Toaster } from "react-hot-toast";
 import Download from "./components/Download";
 import { useSessionContext } from "./contexts/SessionContext";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import { Analytics } from "@vercel/analytics/next";
 function App() {
   const { sessionInfo } = useSessionContext();
   return (
@@ -19,7 +18,6 @@ function App() {
         </main>
       </div>
       <SpeedInsights />
-      <Analytics />
     </>
   );
 }
