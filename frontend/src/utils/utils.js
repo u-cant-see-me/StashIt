@@ -34,3 +34,10 @@ export const getDate = () => {
   const date = new Date(timeStamp);
   return `${date.getDate()}-${date.getMonth()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
 };
+
+export const isDocx = (type) => {
+  return (
+    type ===
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  );
+};
