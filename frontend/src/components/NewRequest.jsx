@@ -5,29 +5,29 @@ import { useEffect, useState } from "react";
 import { useSessionContext } from "../contexts/SessionContext";
 import { PulseLoader } from "react-spinners";
 
-const NewRequest = ({ retry, isConnecting }) => {
-  const { files, clearFiles, updateState } = useFile();
+const NewRequest = () => {
+  const { clearFiles, updateState, filesRef, fileVersion, findFailedFiles } =
+    useFile();
   const { key, removeKey } = useKey();
   const [failedFile, setFailedFiles] = useState([]);
   const { setSessionInfo } = useSessionContext();
 
-  const findFailedFiles = () => {
-    const f = [];
-    for (const file of files) {
-      if (file.state.status === "pending" || file.state.status === "error") {
-        f.push(file);
+  useEffect(() => {
+    for (const file of filesRef.current) {
+      if (
+        file.state.status !== "success" &&
+        file.state.status !== "uploading"
+      ) {
         updateState({ status: "error" }, file.fileInfo.id);
       }
     }
-    return f;
-  };
-  useEffect(() => {
-    setFailedFiles(findFailedFiles());
   }, []);
-  const handleRetry = async () => {
-    await retry(failedFile);
-    setFailedFiles(findFailedFiles());
-  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setFailedFiles(findFailedFiles(), 0);
+    });
+  }, [fileVersion]);
 
   const handleNewRequest = () => {
     sessionStorage.removeItem("page");
@@ -42,19 +42,11 @@ const NewRequest = ({ retry, isConnecting }) => {
   return (
     <div className="relative flex flex-col items-center justify-center   space-y-4">
       <p className="text-green-400 text-sm sm:text-lg font-semibold">
-        Uploaded files {files.length - failedFile.length}/{files.length}!
+        Uploaded files {filesRef.current.length - failedFile.length}/
+        {filesRef.current.length}!
       </p>
-      {failedFile.length > 0 && (
-        <button
-          type="button"
-          className="absolute top-0 right-0 py-2 px-4 bg-red-400 text-white"
-          onClick={handleRetry}
-          // disabled={!isConnecting}
-        >
-          {isConnecting ? <PulseLoader size={5} color="#fff" /> : "Retry All"}
-        </button>
-      )}
-      {key && files.length - failedFile.length > 0 && <KeyHolder />}
+
+      {key && filesRef.current.length - failedFile.length > 0 && <KeyHolder />}
 
       <button
         onClick={handleNewRequest}
