@@ -8,8 +8,9 @@ import { useRetry } from "../hooks/UseRetry";
 import { useSessionContext } from "../contexts/SessionContext";
 import FileList from "./FileList";
 const Main = () => {
-  const { files, expiry, setExpiry, updateState } = useFile();
-  const { sendRequest, uploadAllFiles, requestState } = useUpload();
+  const { files, expiry, setExpiry, updateState, findFailedFiles } = useFile();
+  const { sendRequest, uploadAllFiles, requestState, uploadState } =
+    useUpload();
   const { retryRequest, isConnecting } = useRetry();
   const { sessionInfo } = useSessionContext();
 
@@ -60,7 +61,26 @@ const Main = () => {
       <div className="w-full md:w-[80%]">
         <div>
           <FileList retry={retry} />
-          <ExpiresIn value={expiry} onChange={setExpiry} />
+          <div className="flex justify-between mt-2">
+            <ExpiresIn value={expiry} onChange={setExpiry} />
+            <div>
+              {sessionInfo.newRequest && findFailedFiles().length > 0 && (
+                <button
+                  type="button"
+                  className="py-2 px-6 bg-neutral-900 text-xs sm:text-sm text-white rounded-md overflow-hidden hover:bg-white hover:text-black
+                   transition-all duration-300"
+                  onClick={() => retry(findFailedFiles())}
+                  disabled={isConnecting || uploadState.uploading}
+                >
+                  {isConnecting ? (
+                    <PulseLoader size={5} color="#fff" />
+                  ) : (
+                    "Retry All"
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="flex mt-4">
@@ -68,14 +88,16 @@ const Main = () => {
             {files.length > 0 && !sessionInfo.newRequest && (
               <button
                 type="button"
-                className={`relative py-2 px-6 bg-black text-white rounded-md overflow-hidden
+                className={`relative py-2 px-6 bg-neutral-900 text-white rounded-md overflow-hidden 
                    transition-all duration-300 ${
                      requestState.status === "idle"
                        ? "hover:bg-white hover:text-black"
                        : ""
                    }
                    border border-black`}
-                disabled={requestState.status !== "idle"}
+                disabled={
+                  requestState.status !== "idle" || uploadState.uploading
+                }
                 onClick={() => startUpload()}
               >
                 {requestState.status === "idle" ? (
@@ -95,7 +117,7 @@ const Main = () => {
 
         {sessionInfo.newRequest && (
           <>
-            <NewRequest retry={retry} isConnecting={isConnecting} />
+            <NewRequest />
           </>
         )}
       </div>
