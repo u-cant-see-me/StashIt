@@ -6,7 +6,7 @@ import { useKey } from "../contexts/KeyContext";
 import { useSessionContext } from "../contexts/SessionContext";
 import toast from "react-hot-toast";
 export const useUpload = () => {
-  const { files, updateState, expiry } = useFile();
+  const { files, updateState, expiry, abortController, filesRef } = useFile();
   const { addKey } = useKey();
   const [uploadState, setUploadState] = useState({
     uploading: false,
@@ -67,6 +67,7 @@ export const useUpload = () => {
     const timeoutMs = 5 * 60 * 1000;
     console.log("curr file uploading", fileObj.name);
     const constroller = new AbortController();
+    abortController.current = constroller;
     const timeoutId = setTimeout(() => {
       console.log("aborted");
       toast.error("Request time out");
@@ -117,9 +118,9 @@ export const useUpload = () => {
     for (const url of urls) {
       console.log("url", url);
 
-      const file = files.find((file) => file.fileInfo.id === url.id);
+      const file = filesRef.current.find((file) => file.fileInfo.id === url.id);
       if (!file) {
-        console.warn(`Skipping upload: no file found for id ${url.id}`);
+        console.warn("skipping file with id : " + url.id);
         continue;
       }
       currFile.current = file;
@@ -132,7 +133,6 @@ export const useUpload = () => {
           file.fileInfo.type,
           file.fileInfo.id
         );
-
         updateState({ status: "success" }, file.fileInfo.id);
       } catch (error) {
         if (error.code === "ECONNABORTED") {

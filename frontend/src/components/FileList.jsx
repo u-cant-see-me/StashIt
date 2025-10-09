@@ -11,7 +11,7 @@ import { FileIcon } from "./ui/FileIcon";
 import TextEditModal from "./ui/TextEditModal";
 import { isDocx } from "../utils/utils";
 const FileList = ({ retry }) => {
-  const { files, addFile, removeFile, clearFiles } = useFile();
+  const { files, addFile, removeFile, clearFiles, abortController } = useFile();
   const { sessionInfo } = useSessionContext();
   const [open, setOpen] = useState(false);
   const preview = useRef(null);
@@ -73,7 +73,7 @@ const FileList = ({ retry }) => {
         {files.length === 0 && (
           <li className="text-xs sm:text-sm text-neutral-500">
             <p>Press + to add files or</p>
-            <p>Drag and Drop files</p>
+            <p className="hidden sm:block">Drag and Drop files</p>
             <p>Files must not exceed 50 MB</p>
           </li>
         )}
@@ -82,7 +82,7 @@ const FileList = ({ retry }) => {
           <li
             key={file.fileInfo.id}
             ref={file.state.status === "uploading" ? endRef : null}
-            className="relative flex space-x-4 border-b border-neutral-800 pb-2 last:border-none"
+            className="relative flex border-b border-neutral-800 pb-2 last:border-none"
             onClick={() => handlePreview(file)}
           >
             <div className="min-w-0 w-full space-y-2">
@@ -102,40 +102,58 @@ const FileList = ({ retry }) => {
                 </span>
               </p>
             </div>
-            <span className="flex-1 flex items-center justify-end">
-              {file.state.status === "pending" ? (
-                <button
-                  className="text-neutral-500 hover:text-red-400 text-sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
+            <span className="flex-1 flex items-center justify-end gap-4">
+              <span>
+                {file.state.status === "pending" ? (
+                  ""
+                ) : file.state.status !== "uploading" ? (
+                  <span
+                    className={`text-sm ${
+                      file.state.status === "pending"
+                        ? "text-yellow-400"
+                        : file.state.status === "success"
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {file.state.status !== "error" ? (
+                      file.state.status
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          retry([file]);
+                        }}
+                      >
+                        Retry
+                      </button>
+                    )}
+                  </span>
+                ) : (
+                  <span className="text-green-400 text-xs font-mono">
+                    {file.state.progress}%
+                  </span>
+                )}
+              </span>
+              <button
+                className={`text-neutral-500 hover:text-red-400 text-sm ${
+                  file.state.status === "uploading" ||
+                  file.state.status === "pending"
+                    ? "block"
+                    : "hidden"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (file.state.status === "uploading") {
+                    abortController.current.abort();
+                  } else {
                     removeFile(file.fileInfo.id);
-                  }}
-                >
-                  ✕
-                </button>
-              ) : file.state.status !== "uploading" ? (
-                <span
-                  className={`text-sm ${
-                    file.state.status === "pending"
-                      ? "text-yellow-400"
-                      : file.state.status === "success"
-                      ? "text-green-400"
-                      : "text-red-400"
-                  }`}
-                >
-                  {file.state.status !== "error" ? (
-                    file.state.status
-                  ) : (
-                    <button type="button" onClick={() => retry([file])}>
-                      Retry
-                    </button>
-                  )}
-                </span>
-              ) : (
-                <span className="text-green-400 text-xs font-mono">
-                  {file.state.progress}%
-                </span>
-              )}
+                  }
+                }}
+              >
+                ✕
+              </button>
             </span>
             {file.state.status === "uploading" && (
               <ProgressBar percent={file.state.progress} />
@@ -148,7 +166,7 @@ const FileList = ({ retry }) => {
             className="flex justify-between text-xs sm:text-sm text-neutral-500"
           >
             <span className="flex-1" />
-            <p className="flex-1">
+            <p className="hidden sm:block flex-1">
               {isDragActive ? "Drop files here" : "Drag and drop files.."}
             </p>
             <span>
