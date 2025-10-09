@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import usePersistentState from "../hooks/UsePersistentState";
 import { useIndexedDb } from "../hooks/UseIndexedDb";
 
@@ -14,6 +14,12 @@ export const FileProvider = ({ children }) => {
     clearAllFilesIdb,
     connected,
   } = useIndexedDb();
+  const abortController = useRef(null);
+  const filesRef = useRef(files);
+  const [fileVersion, setFileVersion] = useState(0);
+  useEffect(() => {
+    filesRef.current = files;
+  }, [files]);
 
   useEffect(() => {
     if (!connected) return;
@@ -44,7 +50,6 @@ export const FileProvider = ({ children }) => {
 
   const removeFile = async (id) => {
     await removeFileIdb(id);
-
     setFile((prev) =>
       prev.filter((file) => {
         if (file.fileInfo.id !== id) return file;
@@ -64,6 +69,7 @@ export const FileProvider = ({ children }) => {
       const updatedFile = prev.map((file) => {
         if (file.fileInfo.id === id) {
           found = true;
+          setFileVersion((v) => v + 1);
           return {
             ...file,
             state: { ...file.state, ...update },
@@ -79,6 +85,16 @@ export const FileProvider = ({ children }) => {
       return updatedFile;
     });
   };
+  const findFailedFiles = () => {
+    const f = [];
+    for (const file of filesRef.current) {
+      if (file.state.status !== "success") {
+        f.push(file);
+      }
+    }
+    return f;
+  };
+
   return (
     <FileContext.Provider
       value={{
@@ -89,6 +105,10 @@ export const FileProvider = ({ children }) => {
         clearFiles,
         setExpiry,
         expiry,
+        filesRef,
+        abortController,
+        fileVersion,
+        findFailedFiles,
       }}
     >
       {children}
