@@ -16,7 +16,6 @@ export const FileProvider = ({ children }) => {
   } = useIndexedDb();
   const abortController = useRef(null);
   const filesRef = useRef(files);
-  const [fileVersion, setFileVersion] = useState(0);
   useEffect(() => {
     filesRef.current = files;
   }, [files]);
@@ -69,7 +68,6 @@ export const FileProvider = ({ children }) => {
       const updatedFile = prev.map((file) => {
         if (file.fileInfo.id === id) {
           found = true;
-          setFileVersion((v) => v + 1);
           return {
             ...file,
             state: { ...file.state, ...update },
@@ -85,15 +83,8 @@ export const FileProvider = ({ children }) => {
       return updatedFile;
     });
   };
-  const findFailedFiles = () => {
-    const f = [];
-    for (const file of filesRef.current) {
-      if (file.state.status !== "success") {
-        f.push(file);
-      }
-    }
-    return f;
-  };
+
+  const failedFiles = files.filter((f) => f.state.status !== "success");
 
   return (
     <FileContext.Provider
@@ -107,8 +98,7 @@ export const FileProvider = ({ children }) => {
         expiry,
         filesRef,
         abortController,
-        fileVersion,
-        findFailedFiles,
+        failedFiles,
       }}
     >
       {children}

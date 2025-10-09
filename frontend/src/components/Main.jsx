@@ -8,7 +8,14 @@ import { useRetry } from "../hooks/UseRetry";
 import { useSessionContext } from "../contexts/SessionContext";
 import FileList from "./FileList";
 const Main = () => {
-  const { files, expiry, setExpiry, updateState, findFailedFiles } = useFile();
+  const {
+    files,
+    expiry,
+    setExpiry,
+    updateState,
+    findFailedFiles,
+    failedFiles,
+  } = useFile();
   const { sendRequest, uploadAllFiles, requestState, uploadState } =
     useUpload();
   const { retryRequest, isConnecting } = useRetry();
@@ -64,12 +71,12 @@ const Main = () => {
           <div className="flex justify-between mt-2">
             <ExpiresIn value={expiry} onChange={setExpiry} />
             <div>
-              {sessionInfo.newRequest && findFailedFiles().length > 0 && (
+              {sessionInfo.newRequest && failedFiles.length > 0 && (
                 <button
                   type="button"
                   className="py-2 px-6 bg-neutral-900 text-xs sm:text-sm text-white rounded-md overflow-hidden hover:bg-white hover:text-black
                    transition-all duration-300"
-                  onClick={() => retry(findFailedFiles())}
+                  onClick={() => retry(failedFiles)}
                   disabled={isConnecting || uploadState.uploading}
                 >
                   {isConnecting ? (

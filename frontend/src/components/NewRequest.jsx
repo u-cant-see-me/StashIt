@@ -1,33 +1,21 @@
 import { useFile } from "../contexts/FileContext";
 import { useKey } from "../contexts/KeyContext";
 import KeyHolder from "./KeyHolder";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSessionContext } from "../contexts/SessionContext";
-import { PulseLoader } from "react-spinners";
 
 const NewRequest = () => {
-  const { clearFiles, updateState, filesRef, fileVersion, findFailedFiles } =
-    useFile();
+  const { clearFiles, updateState, files, failedFiles } = useFile();
   const { key, removeKey } = useKey();
-  const [failedFile, setFailedFiles] = useState([]);
   const { setSessionInfo } = useSessionContext();
 
   useEffect(() => {
-    for (const file of filesRef.current) {
-      if (
-        file.state.status !== "success" &&
-        file.state.status !== "uploading"
-      ) {
+    files.forEach((file) => {
+      if (!["success", "uploading"].includes(file.state.status)) {
         updateState({ status: "error" }, file.fileInfo.id);
       }
-    }
-  }, []);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setFailedFiles(findFailedFiles(), 0);
     });
-  }, [fileVersion]);
+  }, []);
 
   const handleNewRequest = () => {
     sessionStorage.removeItem("page");
@@ -39,14 +27,16 @@ const NewRequest = () => {
       newRequest: false,
     }));
   };
+
+  const successCount = files.length - failedFiles.length;
+
   return (
-    <div className="relative flex flex-col items-center justify-center   space-y-4">
+    <div className="relative flex flex-col items-center justify-center space-y-4">
       <p className="text-green-400 text-sm sm:text-lg font-semibold">
-        Uploaded files {filesRef.current.length - failedFile.length}/
-        {filesRef.current.length}!
+        Uploaded files {successCount}/{files.length}!
       </p>
 
-      {key && filesRef.current.length - failedFile.length > 0 && <KeyHolder />}
+      {key && successCount > 0 && <KeyHolder />}
 
       <button
         onClick={handleNewRequest}
