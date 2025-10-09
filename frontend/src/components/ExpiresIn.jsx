@@ -35,17 +35,16 @@ const ExpiresIn = ({ value, onChange }) => {
   }, [value]);
 
   return (
-    <div className="mt-2 text-neutral-200 flex items-center gap-2 outline-none">
-      <label className="block text-xs font-monoton mb-1">Expiry</label>
+    <div className="mt-2 text-neutral-200 flex items-center gap-4 sm:gap-2 outline-none text-xs px-2 ">
+      <label className="block font-monoton mb-1">Expiry</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-neutral-900 text-white text-xs px-2 py-1 rounded-md"
+        className="bg-neutral-900 text-white  px-2 py-1 rounded-md"
       >
         <option value="once">After one use</option>
         <option value="30m">30 min</option>
         <option value="1h">1 Hour</option>
-        <option value="custom">Custom…</option>
         <option value="infinity">infinity</option>
         <option value="random">surprise me</option>
         <option value="elon">elon</option>
